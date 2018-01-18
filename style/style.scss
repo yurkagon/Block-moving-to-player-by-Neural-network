@@ -1,0 +1,16 @@
+.tank{
+    background: red;
+    height: 50px;
+    width: 50px;
+    position: absolute;
+}
+.tank.player{
+    background: green;
+}
+
+#place{
+    background: blue;
+    height: 750px;
+    width: 1200px;
+    margin: auto;
+}
