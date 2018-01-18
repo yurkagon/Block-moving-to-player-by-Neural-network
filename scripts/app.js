@@ -1,7 +1,8 @@
 const SPEED = 2;
 
+//function that made by neural network
 var AIoutput = function(input) {
-    return {'x':1/(1+1/Math.exp(-2.006671109693907-13.337789487281682*(1/(1+1/Math.exp(6.324687880278037-5.139094023478103*(input['0'])+0.009873405629696023*(input['1'])-0.08384310758438314*(input['2'])-0.007782195430831659*(input['3']))))+15.479915860329328*(1/(1+1/Math.exp(1.2422598953404802+4.278458047188069*(input['0'])-0.026834652527315192*(input['1'])+0.09669907703133201*(input['2'])+0.0037817803982278064*(input['3']))))+0.09924013652485578*(1/(1+1/Math.exp(-1.1433750537938492+0.05931132638707718*(input['0'])+1.2188743723993942*(input['1'])+0.011299175174647482*(input['2'])+0.04629387131903781*(input['3'])))))),'y':1/(1+1/Math.exp(-6.303780631126409+0.620901361105022*(1/(1+1/Math.exp(6.324687880278037-5.139094023478103*(input['0'])+0.009873405629696023*(input['1'])-0.08384310758438314*(input['2'])-0.007782195430831659*(input['3']))))-0.654085201915954*(1/(1+1/Math.exp(1.2422598953404802+4.278458047188069*(input['0'])-0.026834652527315192*(input['1'])+0.09669907703133201*(input['2'])+0.0037817803982278064*(input['3']))))+16.639170232945734*(1/(1+1/Math.exp(-1.1433750537938492+0.05931132638707718*(input['0'])+1.2188743723993942*(input['1'])+0.011299175174647482*(input['2'])+0.04629387131903781*(input['3']))))))}
+    return {'x':1/(1+1/Math.exp(-5.744704791523695+14.263537923410247*(1/(1+1/Math.exp(-0.8805351300050027+1.3559682438285972*(input['0'])+0.034716405982830635*(input['1'])+0.01164882555595909*(input['2'])+0.00459710290424416*(input['3']))))-0.8096091188590291*(1/(1+1/Math.exp(2.0526681063266694-0.015041343070332003*(input['0'])+3.9088502536934757*(input['1'])+0.0009153852083564358*(input['2'])+0.11953452686826888*(input['3']))))-1.2183217638789918*(1/(1+1/Math.exp(-6.93949915411895+0.0023227920376443154*(input['0'])+4.412374721870764*(input['1'])+0.024343092162103026*(input['2'])+0.13719712380703308*(input['3'])))))),'y':1/(1+1/Math.exp(-30.810973418380403+0.028632642094086305*(1/(1+1/Math.exp(-0.8805351300050027+1.3559682438285972*(input['0'])+0.034716405982830635*(input['1'])+0.01164882555595909*(input['2'])+0.00459710290424416*(input['3']))))+30.951222977375025*(1/(1+1/Math.exp(2.0526681063266694-0.015041343070332003*(input['0'])+3.9088502536934757*(input['1'])+0.0009153852083564358*(input['2'])+0.11953452686826888*(input['3']))))+39.88680294225567*(1/(1+1/Math.exp(-6.93949915411895+0.0023227920376443154*(input['0'])+4.412374721870764*(input['1'])+0.024343092162103026*(input['2'])+0.13719712380703308*(input['3']))))))}
 }
 class Tank{
     constructor(position){
@@ -41,23 +42,43 @@ class Enemy extends Tank{
     constructor(position){
         super(position);
 
+        
+        this._moveVector = {x: 0, y: 0};
+        this._changeVectorTimer = 100;
+        this._changeVectorCoolDown = 0;
+    }
+    
+    AImoveVector(player){
+        if(this._changeVectorCoolDown == 0 ){
+            let coord = getDefultCoord(AIoutput(setNetInput(NormalizeCoord(this.x,this.y),NormalizeCoord(player.x,player.y))));
+            this._moveVector = {
+                x: limiter(-this.x + coord.x)?limiter(-this.x + coord.x):this._moveVector.x,
+                y: limiter(-this.y + coord.y)?limiter(-this.y + coord.y):this._moveVector.y,
+            };
+
+            this._changeVectorCoolDown = this._changeVectorTimer;
+
+            function limiter(value,min,max){
+                if(value >= 0.1 ) return 1;
+                if(value <= -0.1 ) return -1;
+                return 0;
+            }
+        }
+        this._changeVectorCoolDown -= 1;
+        if(this._changeVectorCoolDown < 0) this._changeVectorCoolDown = 0;
     }
 
     AI(player){
-        let coord = getDefultCoord(AIoutput(setNetInput(NormalizeCoord(this.x,this.y),NormalizeCoord(player.x,player.y))));
-        console.log(this.x - coord.x)
-        this.moveByVector(limiter(-this.x + coord.x,-1,1), limiter(-this.y + coord.y,-1,1));
-        function limiter(value,min,max){
-            if(value <= min ) return min;
-            if(value >= max ) return max;
-            return value;
-        }
+       if(this._moveVector.x || this._moveVector.y) this.moveByVector(this._moveVector.x,this._moveVector.y);
+       this.AImoveVector(player);
+       
     }
+
 }
 $(window).ready(()=>{
     var player = new Player({
-        x: 50,
-        y: 100,
+        x: 300,
+        y: 300,
     })
     
     var enemies = []

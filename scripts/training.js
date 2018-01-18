@@ -3,21 +3,23 @@ var net =  new brain.NeuralNetwork();
 
 if (prevTraining) net.fromJSON(JSON.parse(prevTraining));
 
+//training settings
 var netTrainingSettings = {
     errorThresh: 0.000001,
-    iterations: 200000,
+    iterations: 5000000,
     log: true,           
     logPeriod: 5000,     
-    learningRate: 0.2,
+    learningRate: 0.3,
 }
 const HEIGHT = 750;
 const WIDTH = 1200;
 
+//getting and adding date table with examples. Using in training
 var dataTable = localStorage.getItem('data')?JSON.parse(localStorage.getItem('data')):[];
 dataTable.push(addRandomTrueData());
 localStorage.setItem('data',JSON.stringify(dataTable));
 
-
+//training example
 /*var data = [{input: setNetInput(NormalizeCoord(0,0),NormalizeCoord(0,0)), output: NormalizeCoord(0,0)},
             {input: setNetInput(NormalizeCoord(100,100),NormalizeCoord(50,100)), output: NormalizeCoord(90,100)},
             {input: setNetInput(NormalizeCoord(90,100),NormalizeCoord(50,100)), output: NormalizeCoord(80,100)},
@@ -25,19 +27,24 @@ localStorage.setItem('data',JSON.stringify(dataTable));
             {input: setNetInput(NormalizeCoord(200,50),NormalizeCoord(7,51)), output: NormalizeCoord(190,40)},
             {input: setNetInput(NormalizeCoord(200,51),NormalizeCoord(7,51)), output: NormalizeCoord(190,51)}]
 */
+
+//comented = off training
 //net.train(dataTable,netTrainingSettings);
 
-var output = net.run(setNetInput(NormalizeCoord(300,100),NormalizeCoord(7,51)));  
+//testing neural network
+var output = net.run(setNetInput(NormalizeCoord(300,100),NormalizeCoord(7,51)));
+console.log(getDefultCoord(output));
+
 //localStorage.setItem("train", JSON.stringify(net.toJSON()));
 
-console.log(getDefultCoord(output))
+//autoreload for training
 //window.location.reload(true);
 
 var run = net.toFunction();
-console.log(run.toString()); // copy and paste! no need to import brain.js
+console.log(run.toString()); // copy and paste result function in app.js 
 
 
-
+//random true data for training
 function addRandomTrueData(){
     let x1 = Math.floor(Math.random() * WIDTH);
     let y1  = Math.floor(Math.random() * HEIGHT);
@@ -52,6 +59,7 @@ function addRandomTrueData(){
     return {input: setNetInput(NormalizeCoord(x1,y1),NormalizeCoord(x2,y2)), output: NormalizeCoord(rx,ry)}
 }
 
+//getting coords from [0,1] style
 function getDefultCoord(normCoord){
 
     let x = normCoord.x*WIDTH;
@@ -60,6 +68,7 @@ function getDefultCoord(normCoord){
     return {x,y};
 
 }
+//normalizing for setting data in [0,1]
 function NormalizeCoord(x,y){
     const d1 = 0, d2 = 1;
 
@@ -69,6 +78,9 @@ function NormalizeCoord(x,y){
     return {x: nx, y: ny};
     
 }
+//setting array for input
 function setNetInput(coord1,coord2){
     return [coord1.x,coord1.y,coord2.x,coord2.y,]
 }
+
+
